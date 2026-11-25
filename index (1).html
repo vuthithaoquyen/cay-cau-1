@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Xưởng Thiết Kế Cầu Giàn</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Bố cục: khổ bản vẽ kỹ thuật bên trái + bàn điều khiển thiết bị bên phải; nền xanh blueprint, chữ số đơn cách */
+:root{
+  --bg:#eef2f6; --panel:#ffffff; --panel-2:#f5f8fb; --line:#d5dde7; --ink:#14212f; --muted:#5b6b7d;
+  --accent:#1f6feb; --accent-ink:#ffffff; --cyan:#0b7fa6; --amber:#b86e00;
+  --tension:#1d64d8; --compress:#d43a3a; --zero:#8a97a6; --ok:#13865a; --warn:#b86e00; --bad:#d43a3a;
+  --sheet:#fbfcfd; --grid-a:rgba(31,111,235,.06); --grid-b:rgba(31,111,235,.13);
+  --f-display:'Archivo',system-ui,sans-serif; --f-body:'Be Vietnam Pro',system-ui,sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#07111d; --panel:#0c1a2a; --panel-2:#0f2235; --line:#1d3550; --ink:#e7eef6; --muted:#8aa0b8;
+  --accent:#3b8bff; --accent-ink:#04101e; --cyan:#4cc6ec; --amber:#f2b440;
+  --tension:#4ea4ff; --compress:#ff5f5f; --zero:#6f8297; --ok:#3fd18f; --warn:#f2b440; --bad:#ff5f5f;
+  --sheet:#0a1828; --grid-a:rgba(76,198,236,.06); --grid-b:rgba(76,198,236,.14); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#07111d; --panel:#0c1a2a; --panel-2:#0f2235; --line:#1d3550; --ink:#e7eef6; --muted:#8aa0b8;
+  --accent:#3b8bff; --accent-ink:#04101e; --cyan:#4cc6ec; --amber:#f2b440;
+  --tension:#4ea4ff; --compress:#ff5f5f; --zero:#6f8297; --ok:#3fd18f; --warn:#f2b440; --bad:#ff5f5f;
+  --sheet:#0a1828; --grid-a:rgba(76,198,236,.06); --grid-b:rgba(76,198,236,.14); color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+.app{display:grid;grid-template-rows:auto minmax(0,1fr);height:100%}
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;justify-content:space-between;
+  padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:var(--panel);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.mark{width:40px;height:40px;border-radius:10px;background:var(--ink);display:grid;place-items:center;flex:none}
+.mark svg{width:26px;height:26px;stroke:var(--bg)}
+.brand h1{margin:0;font:800 17px/1.15 var(--f-display);letter-spacing:-.01em;text-wrap:balance}
+.brand p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.tag{font:600 10px var(--f-mono);letter-spacing:.08em;padding:2px 6px;border:1px solid var(--line);border-radius:4px;color:var(--cyan);margin-left:6px;vertical-align:2px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);font-size:13px;font-weight:600;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--muted)}
+.btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+
+main{display:grid;grid-template-columns:minmax(0,1fr) 370px;min-height:0;overflow:hidden}
+.stage{display:flex;flex-direction:column;gap:12px;min-width:0;min-height:0;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:14px}
+.sheet{position:relative;flex:1 1 0;min-height:320px;border-radius:12px;border:1px solid var(--line);background:var(--sheet);overflow:hidden}
+canvas#cv{position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:none}
+.overlay{position:absolute;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ov-tl{top:12px;left:12px}
+.ov-br{bottom:12px;right:12px}
+.ov-bl{bottom:12px;left:12px}
+.seg{display:inline-flex;padding:3px;border-radius:9px;background:var(--panel);border:1px solid var(--line)}
+.seg button{border:0;background:transparent;padding:6px 11px;border-radius:6px;font-size:12px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.legend{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:11.5px;display:flex;gap:12px;flex-wrap:wrap}
+.legend i{display:inline-block;width:16px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.run{background:var(--ok);border-color:var(--ok);color:#fff}
+.run.on{background:var(--bad);border-color:var(--bad)}
+.hint{font-size:11.5px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 9px}
+#tip{position:absolute;pointer-events:none;z-index:5;min-width:190px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:12px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+#tip b{font-family:var(--f-display);font-size:13px}
+#tip .r{display:flex;justify-content:space-between;gap:14px}
+#tip .r span:last-child{font-family:var(--f-mono)}
+.alert{position:absolute;top:58px;left:50%;transform:translateX(-50%);max-width:min(92%,460px);background:var(--panel);border:1px solid var(--bad);border-left-width:4px;border-radius:9px;padding:8px 12px;font-size:12.5px}
+
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 11px;min-width:0}
+.kpi .k{font:600 10px var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font:700 19px/1.25 var(--f-mono);font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .v small{font-size:12px;font-weight:500;color:var(--muted)}
+.pill{display:inline-block;font:700 12px var(--f-body);padding:3px 9px;border-radius:999px;margin-top:4px}
+.pill.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.pill.warn{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.pill.bad{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.pill.idle{background:var(--panel-2);color:var(--muted)}
+
+aside{background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;padding-block:12px;padding-left:16px;padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:12px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line)}
+.tabs button{border:0;background:transparent;padding:7px 4px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.pane{display:flex;flex-direction:column;gap:9px}
+.tdesc{margin:-2px 0 2px;font-size:12px;color:var(--muted);min-height:18px}
+.field.row{flex-direction:row;align-items:center;gap:10px}.field.row label{font-size:12.5px;flex:none}
+.btn.big{justify-content:center;padding:11px 14px;font-size:14px}
+.btn.tour{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));color:var(--accent)}
+.btn.tour.on{background:var(--accent);color:var(--accent-ink)}
+.subs{position:absolute;left:50%;bottom:62px;transform:translateX(-50%);width:min(760px,calc(100% - 24px));background:rgba(8,16,28,.86);color:#fff;border-radius:12px;padding:10px 44px 11px 16px;text-align:center;backdrop-filter:blur(4px)}
+.subs .x{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.12);border-color:transparent;color:#fff}
+.sub-step{font:600 10.5px var(--f-mono);letter-spacing:.08em;color:#7fc4ff;text-transform:uppercase}
+.sub-vi{margin:3px 0 0;font:600 16px/1.45 var(--f-body);text-wrap:balance}
+.sub-en{margin:3px 0 0;font:italic 400 12.5px/1.4 var(--f-body);color:#b8c6d6}
+.group{display:flex;flex-direction:column;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.group:last-child{border-bottom:0}
+.gh{display:flex;justify-content:space-between;align-items:baseline}
+.gh h2{margin:0;font:700 12px var(--f-display);letter-spacing:.09em;text-transform:uppercase}
+.gh span{font:500 11px var(--f-mono);color:var(--muted)}
+.types{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.type{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px 6px;border-radius:9px;border:1px solid var(--line);background:var(--panel-2)}
+.type svg{width:100%;height:20px;stroke:var(--muted);fill:none;stroke-width:1.6;stroke-linejoin:round}
+.type b{font:700 11.5px var(--f-display)}
+.type small{font-size:11px;color:var(--muted);line-height:1.3}
+.type[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.type[aria-pressed="true"] svg{stroke:var(--accent)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field .lab{display:flex;justify-content:space-between;font-size:12.5px}
+.field .lab output{font:600 12.5px var(--f-mono);color:var(--cyan)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:var(--line);outline-offset:6px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--panel);border:3px solid var(--accent);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--panel);border:3px solid var(--accent);cursor:pointer}
+.scale{display:flex;justify-content:space-between;font:500 10px var(--f-mono);color:var(--muted)}
+input[type=text]{width:100%;padding:7px 9px;border-radius:7px;border:1px solid var(--line);background:var(--panel-2);font-size:13px}
+.toggles{display:grid;gap:2px}
+.tg{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;font-size:13px;cursor:pointer;border-bottom:1px dashed var(--line)}
+.tg .sw{display:flex;align-items:center;gap:8px}
+.tg .dot{width:9px;height:9px;border-radius:2px}
+.tg input{width:16px;height:16px;accent-color:var(--accent)}
+.note{font-size:12px;line-height:1.55;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+.note b{color:var(--ink)}
+.readout{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:12px}
+.readout span:nth-child(even){font-family:var(--f-mono);font-weight:600;text-align:right}
+
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);padding:0;width:min(560px,calc(100vw - 32px));max-height:86vh}
+dialog::backdrop{background:rgba(5,12,22,.55)}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}
+.dh h3{margin:0;font:800 16px var(--f-display)}
+.dh p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+.db{padding:16px 18px;overflow:auto;display:flex;flex-direction:column;gap:14px;max-height:calc(86vh - 140px)}
+.df{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sum div{background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:8px;text-align:center}
+.sum small{display:block;font:600 10px var(--f-mono);letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.sum b{font:700 17px var(--f-mono)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:9px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line)}
+th{font:600 10.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--panel-2)}
+td.n{text-align:right;font-family:var(--f-mono)}
+tr:last-child td{border-bottom:0}
+.x{border:1px solid var(--line);background:var(--panel-2);width:30px;height:30px;border-radius:7px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,10px);opacity:0;pointer-events:none;background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:9px;font-size:13px;font-weight:600;transition:.25s;z-index:60}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1180px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:960px){
+  .app{height:auto;min-height:100%}
+  main{grid-template-columns:1fr;overflow:visible}
+  aside{border-left:0;border-top:1px solid var(--line);padding-left:max(16px,env(safe-area-inset-left,0px))}
+  .stage{padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .sheet{min-height:400px}
+}
+@media (max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.brand p{display:none}.btn .lbl{display:none}}
+@media (max-width:640px){.hint,.ov-bl{display:none}.subs{bottom:58px}.sub-vi{font-size:14px}}
+@media (max-width:900px) and (min-width:400px){.btn.tour .lbl{display:inline}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="bar">
+  <div class="brand">
+    <div class="mark"><svg viewBox="0 0 26 26" fill="none" stroke-width="2" stroke-linejoin="round"><path d="M2 19h22M4 19l4.5-9 4.5 9 4.5-9 4.5 9M8.5 10h9"/></svg></div>
+    <div>
+      <h1>Xưởng Thiết Kế Cầu Giàn <span class="tag">CAD 3.0</span></h1>
+      <p>Hoạt động 3 · Kỹ sư sáng tạo trong không gian số</p>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn tour" id="btnTour" type="button"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg><span class="lbl" id="tourLbl">Giới thiệu kiểu giàn</span></button>
+    <button class="btn" id="btnBom" type="button"><svg viewBox="0 0 24 24"><path d="M9 5h10M9 12h10M9 19h10M4 5h.01M4 12h.01M4 19h.01"/></svg><span class="lbl">Bảng cắt ống giấy</span></button>
+    <button class="btn" id="btnTheme" type="button"><svg viewBox="0 0 24 24"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg><span class="lbl" id="themeLbl">Đổi nền</span></button>
+    <button class="btn primary" id="btnPng" type="button"><svg viewBox="0 0 24 24"><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M8 12l4 4 4-4M12 4v12"/></svg><span class="lbl">Xuất bản vẽ PNG</span></button>
+  </div>
+</header>
+
+<main>
+  <section class="stage">
+    <div class="sheet" id="sheet">
+      <canvas id="cv" aria-label="Bản vẽ cầu giàn"></canvas>
+      <div class="overlay ov-tl">
+        <div class="seg" role="group" aria-label="Chế độ xem">
+          <button type="button" id="v2d" aria-pressed="true">Bản vẽ 2D</button>
+          <button type="button" id="v3d" aria-pressed="false">Mô hình 3D</button>
+        </div>
+        <span class="hint" id="hint">Kéo trên mặt cầu để dời vật nặng · rê chuột vào thanh để xem số liệu</span>
+      </div>
+      <div class="alert" id="alert" hidden><b style="color:var(--bad)">Quá tải.</b> Thanh tô đậm sẽ gãy trước. Hãy tăng chiều cao H, thêm khoang hoặc chọn giàn Vòm Parker.</div>
+      <div class="overlay ov-bl"><div class="legend" id="legend">
+        <span><i style="background:var(--tension)"></i>Chịu kéo</span>
+        <span><i style="background:var(--compress)"></i>Chịu nén</span>
+        <span><i style="background:var(--zero)"></i>Lực ≈ 0</span>
+      </div></div>
+      <div class="overlay ov-br"><button class="btn run" id="btnRun" type="button"><span id="runIco">▶</span><span id="runLbl">Hoạt cảnh xe chạy</span></button></div>
+      <div class="subs" id="subs" hidden><div class="sub-step" id="subStep"></div><p class="sub-vi" id="subVi"></p><p class="sub-en" id="subEn"></p><button class="x" type="button" id="subStop" aria-label="Dừng giới thiệu">✕</button></div>
+      <div id="tip" hidden></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Tam giác</div><div class="v" id="kTri">0</div></div>
+      <div class="kpi"><div class="k">Thanh / Nút</div><div class="v" id="kMem">0</div></div>
+      <div class="kpi"><div class="k">Ống giấy cần</div><div class="v" id="kLen">0</div></div>
+      <div class="kpi"><div class="k">Lực kéo max</div><div class="v" id="kT" style="color:var(--tension)">0</div></div>
+      <div class="kpi"><div class="k">Lực nén max</div><div class="v" id="kC" style="color:var(--compress)">0</div></div>
+      <div class="kpi"><div class="k">Sức chịu tải</div><div class="v" id="kCap">0</div><span class="pill ok" id="kStat">An toàn</span></div>
+    </div>
+  </section>
+
+  <aside>
+    <div class="tabs" role="tablist">
+      <button role="tab" type="button" id="tab1" aria-selected="true" aria-controls="pan1">Thiết kế</button>
+      <button role="tab" type="button" id="tab2" aria-selected="false" aria-controls="pan2">Thử tải</button>
+      <button role="tab" type="button" id="tab3" aria-selected="false" aria-controls="pan3">Hiển thị</button>
+    </div>
+
+    <div class="pane" id="pan1" role="tabpanel">
+      <div class="types" id="types">
+        <button class="type" type="button" data-t="warren" aria-pressed="true" title="Tam giác cân xen kẽ, không thanh đứng"><svg viewBox="0 0 100 26"><path d="M4 22h92M4 22l11.5-18 11.5 18 11.5-18 11.5 18 11.5-18 11.5 18 11.5-18 11.5 18M15.5 4h69"/></svg><b>Warren</b></button>
+        <button class="type" type="button" data-t="pratt" aria-pressed="false" title="Chéo dốc về giữa nhịp, chịu kéo"><svg viewBox="0 0 100 26"><path d="M4 22h92M19 4h62M4 22L19 4v18M34 4v18M50 4v18M66 4v18M81 4v18L96 22M19 4l15 18M34 4l16 18M81 4L66 22M66 4L50 22"/></svg><b>Pratt</b></button>
+        <button class="type" type="button" data-t="howe" aria-pressed="false" title="Chéo dốc ra mố cầu, chịu nén"><svg viewBox="0 0 100 26"><path d="M4 22h92M19 4h62M4 22L19 4v18M34 4v18M50 4v18M66 4v18M81 4v18L96 22M19 22L34 4M34 22L50 4M81 22L66 4M66 22L50 4"/></svg><b>Howe</b></button>
+        <button class="type" type="button" data-t="parker" aria-pressed="false" title="Biên trên cong, tiết kiệm vật liệu"><svg viewBox="0 0 100 26"><path d="M4 22h92M4 22L19 9 34 5 50 3.5 66 5 81 9 96 22M19 9v13M34 5v17M50 3.5v18.5M66 5v17M81 9v13M19 9l15 13M34 5l16 17M81 9L66 22M66 5L50 22"/></svg><b>Parker</b></button>
+      </div>
+      <p class="tdesc" id="tdesc">Warren: tam giác cân xen kẽ, không có thanh đứng.</p>
+      <div class="field"><div class="lab"><label for="iL">Chiều dài cầu L</label><output id="oL">60 cm</output></div><input type="range" id="iL" min="30" max="100" step="2" value="60"></div>
+      <div class="field"><div class="lab"><label for="iH">Chiều cao giàn H</label><output id="oH">12 cm</output></div><input type="range" id="iH" min="6" max="24" step="1" value="12"></div>
+      <div class="field"><div class="lab"><label for="iN">Số khoang n</label><output id="oN">6 khoang</output></div><input type="range" id="iN" min="4" max="10" step="2" value="6"></div>
+      <div class="field"><div class="lab"><label for="iW">Bề rộng mặt cầu W</label><output id="oW">10 cm</output></div><input type="range" id="iW" min="6" max="18" step="1" value="10"></div>
+      <div class="field row"><label for="iG">Nhóm</label><input type="text" id="iG" maxlength="32" value="Nhóm 1 · Kỹ sư trẻ"></div>
+      <div class="readout">
+        <span>Một khoang dài</span><span id="rBay">10.0 cm</span>
+        <span>Góc thanh chéo</span><span id="rAng">50°</span>
+        <span>Nhịp / chiều cao</span><span id="rRat">5.0</span>
+      </div>
+    </div>
+
+    <div class="pane" id="pan2" role="tabpanel" hidden>
+      <div class="field"><div class="lab"><label for="iP">Khối lượng xe tải</label><output id="oP">2.0 kg</output></div><input type="range" id="iP" min="0" max="10" step="0.5" value="2"><div class="scale"><span>0</span><span>5 kg</span><span>10 kg</span></div></div>
+      <div class="field"><div class="lab"><label for="iX">Vị trí xe trên cầu</label><output id="oX">30 cm</output></div><input type="range" id="iX" min="0" max="60" step="0.5" value="30"></div>
+      <div class="readout">
+        <span>Trọng lượng xe P</span><span id="oP2">19.6 N</span>
+        <span>Phản lực gối trái R<sub>A</sub></span><span id="rRA">0 N</span>
+        <span>Phản lực gối phải R<sub>B</sub></span><span id="rRB">0 N</span>
+        <span>Vị trí bất lợi nhất</span><span id="rWorst">30 cm</span>
+      </div>
+      <button class="btn big run" id="btnScene" type="button"><span id="scIco">▶</span><span id="scLbl">Hoạt cảnh xe chạy qua cầu</span></button>
+      <div class="field"><div class="lab"><label for="iSpd">Tốc độ xe</label><output id="oSpd">Vừa</output></div><input type="range" id="iSpd" min="1" max="3" step="1" value="2"></div>
+      <div class="note">Hoạt cảnh tự bật màu lực: <b style="color:var(--tension)">xanh = kéo</b>, <b style="color:var(--compress)">đỏ = nén</b>. Vòng sáng chỉ thanh đang chịu lực lớn nhất. Mũi tên xanh lá ở hai gối dài ra hay ngắn lại theo vị trí xe.</div>
+    </div>
+
+    <div class="pane" id="pan3" role="tabpanel" hidden>
+      <div class="toggles">
+        <label class="tg"><span class="sw"><span class="dot" style="background:var(--ok)"></span>Kích thước L, H</span><input type="checkbox" id="cDim" checked></label>
+        <label class="tg"><span class="sw"><span class="dot" style="background:var(--amber)"></span>Làm nổi thanh giằng chéo</span><input type="checkbox" id="cDiag" checked></label>
+        <label class="tg"><span class="sw"><span class="dot" style="background:var(--cyan)"></span>Tô và đánh số tam giác</span><input type="checkbox" id="cTri" checked></label>
+        <label class="tg"><span class="sw"><span class="dot" style="background:var(--muted)"></span>Tên nút khớp</span><input type="checkbox" id="cNode" checked></label>
+        <label class="tg"><span class="sw"><span class="dot" style="background:var(--compress)"></span>Màu lực kéo / nén</span><input type="checkbox" id="cForce"></label>
+        <label class="tg"><span class="sw"><span class="dot" style="background:var(--tension)"></span>Giá trị lực từng thanh (N)</span><input type="checkbox" id="cVal"></label>
+        <label class="tg"><span class="sw"><span class="dot" style="background:var(--ink)"></span>Biến dạng (phóng đại)</span><input type="checkbox" id="cDef"></label>
+      </div>
+      <div class="note"><b>Nguyên lý:</b> tam giác không đổi hình khi các cạnh giữ nguyên độ dài. Thanh chịu nén càng dài càng dễ cong oằn.</div>
+      <div class="note">Lực tính bằng <b>phương pháp tách nút</b> cho một mặt giàn (mỗi mặt nhận ½ tải). Ống giấy: kéo đứt ≈ 100 N; nén mất ổn định theo Euler (ống 10 cm ≈ 45 N).</div>
+    </div>
+  </aside>
+</main>
+</div>
+
+<dialog id="bom">
+  <div class="dh"><div><h3>Bảng cắt ống giấy</h3><p id="bomSub"></p></div><button class="x" type="button" id="bomX" aria-label="Đóng">✕</button></div>
+  <div class="db" id="bomBody"></div>
+  <div class="df"><button class="btn" type="button" id="bomCopy">Sao chép bảng</button><button class="btn primary" type="button" id="bomClose">Đóng</button></div>
+</dialog>
+<div id="toast" role="status"></div>
+<script>
+/* TRUSS CORE — dùng chung cho trang HTML và file GeoGebra.
+   Giải giàn tĩnh định bằng phương pháp tách nút (ma trận cân bằng), lực dương = KÉO. */
+var TrussCore = (function () {
+  var EA = 25000;          // độ cứng dọc trục ống giấy (N)
+  var T_CAP = 100;         // sức kéo đứt của 1 ống giấy (N)
+  var C_CRUSH = 80;        // sức nén dập (N)
+  var EI = 456;            // độ cứng uốn (N·cm²) → ống 10 cm mất ổn định ở ~45 N
+  function capComp(l) { return Math.min(C_CRUSH, Math.PI * Math.PI * EI / (l * l)); }
+
+  function build(type, L, H, n) {
+    var bay = L / n, nodes = [], mem = [], tri = [], i;
+    for (i = 0; i <= n; i++) nodes.push({ x: i * bay, y: 0, label: 'A' + i, chord: 'bottom' });
+    var b = n + 1;
+    if (type === 'warren') {
+      for (i = 0; i < n; i++) nodes.push({ x: (i + .5) * bay, y: H, label: 'B' + (i + 1), chord: 'top' });
+      for (i = 0; i < n; i++) mem.push({ u: i, v: i + 1, type: 'bottom' });
+      for (i = 0; i < n - 1; i++) mem.push({ u: b + i, v: b + i + 1, type: 'top' });
+      for (i = 0; i < n; i++) {
+        mem.push({ u: i, v: b + i, type: 'diagonal' });
+        mem.push({ u: b + i, v: i + 1, type: 'diagonal' });
+        tri.push([i, b + i, i + 1]);
+        if (i < n - 1) tri.push([b + i, i + 1, b + i + 1]);
+      }
+    } else {
+      var T = function (k) { return b + k - 1; };
+      for (i = 1; i < n; i++) {
+        var y = H;
+        if (type === 'parker') { var s = (i - n / 2) / (n / 2); y = H * (0.62 + 0.38 * (1 - s * s)); }
+        nodes.push({ x: i * bay, y: y, label: 'B' + i, chord: 'top' });
+      }
+      for (i = 0; i < n; i++) mem.push({ u: i, v: i + 1, type: 'bottom' });
+      for (i = 1; i < n - 1; i++) mem.push({ u: T(i), v: T(i + 1), type: 'top' });
+      for (i = 1; i < n; i++) mem.push({ u: i, v: T(i), type: 'vertical' });
+      mem.push({ u: 0, v: T(1), type: 'endpost' }); tri.push([0, T(1), 1]);
+      for (i = 1; i < n - 1; i++) {
+        var left = i < n / 2, down = (type === 'howe') ? !left : left; // Pratt/Parker: chéo dốc xuống về giữa nhịp
+        if (down) { mem.push({ u: T(i), v: i + 1, type: 'diagonal' }); tri.push([i, T(i), i + 1]); tri.push([T(i), T(i + 1), i + 1]); }
+        else { mem.push({ u: i, v: T(i + 1), type: 'diagonal' }); tri.push([i, T(i), T(i + 1)]); tri.push([i, T(i + 1), i + 1]); }
+      }
+      mem.push({ u: n, v: T(n - 1), type: 'endpost' }); tri.push([n - 1, T(n - 1), n]);
+    }
+    mem.forEach(function (m) {
+      var a = nodes[m.u], c = nodes[m.v];
+      m.len = Math.hypot(c.x - a.x, c.y - a.y);
+      m.capT = T_CAP; m.capC = capComp(m.len);
+    });
+    return { nodes: nodes, members: mem, triangles: tri, n: n, L: L, H: H, bay: bay };
+  }
+
+  function solve(A, b) {                       // Gauss khử có chọn trụ
+    var N = b.length, M = A.map(function (r, i) { return r.concat([b[i]]); }), i, j, k;
+    for (k = 0; k < N; k++) {
+      var p = k; for (i = k + 1; i < N; i++) if (Math.abs(M[i][k]) > Math.abs(M[p][k])) p = i;
+      if (Math.abs(M[p][k]) < 1e-12) return null;
+      var t = M[k]; M[k] = M[p]; M[p] = t;
+      for (i = k + 1; i < N; i++) { var f = M[i][k] / M[k][k]; if (f) for (j = k; j <= N; j++) M[i][j] -= f * M[k][j]; }
+    }
+    var x = new Array(N);
+    for (i = N - 1; i >= 0; i--) { var s = M[i][N]; for (j = i + 1; j < N; j++) s -= M[i][j] * x[j]; x[i] = s / M[i][i]; }
+    return x;
+  }
+
+  function matrix(t) {                          // cột: các thanh, rồi R0x, R0y, Rny
+    var J = t.nodes.length, m = t.members.length, N = 2 * J, A = [], i;
+    for (i = 0; i < N; i++) { A.push(new Array(m + 3).fill(0)); }
+    t.members.forEach(function (mb, c) {
+      var a = t.nodes[mb.u], d = t.nodes[mb.v], ux = (d.x - a.x) / mb.len, uy = (d.y - a.y) / mb.len;
+      A[2 * mb.u][c] += ux; A[2 * mb.u + 1][c] += uy; A[2 * mb.v][c] -= ux; A[2 * mb.v + 1][c] -= uy;
+    });
+    A[0][m] = 1; A[1][m + 1] = 1; A[2 * t.n + 1][m + 2] = 1;
+    return A;
+  }
+
+  function loadVector(t, xLoad, P) {            // P (N) phân về 2 nút biên dưới kề nhau
+    var b = new Array(2 * t.nodes.length).fill(0);
+    var s = Math.max(0, Math.min(t.L, xLoad)) / t.bay, k = Math.min(t.n - 1, Math.floor(s)), r = s - k;
+    b[2 * k + 1] += P * (1 - r); b[2 * (k + 1) + 1] += P * r;   // A·x = −f, f hướng xuống
+    return b;
+  }
+
+  function analyze(type, L, H, n, xLoad, P, withDisp) {
+    var t = build(type, L, H, n), A = matrix(t), m = t.members.length;
+    var x = solve(A, loadVector(t, xLoad, P));
+    var maxU = 0, maxT = 0, maxC = 0;
+    t.members.forEach(function (mb, i) {
+      mb.force = x ? x[i] : 0;
+      var f = mb.force; if (Math.abs(f) < 1e-9) f = 0;
+      mb.util = f >= 0 ? f / mb.capT : -f / mb.capC;
+      if (mb.util > maxU) maxU = mb.util;
+      if (f > maxT) maxT = f; if (-f > maxC) maxC = -f;
+    });
+    t.R = x ? { Ax: x[m], Ay: x[m + 1], By: x[m + 2] } : { Ax: 0, Ay: 0, By: 0 };
+    t.maxU = maxU; t.maxT = maxT; t.maxC = maxC; t.P = P; t.xLoad = xLoad;
+    if (withDisp && x) {                         // chuyển vị nút: Aᵀ·d = [−e ; 0]
+      var AT = [], i, j;
+      for (j = 0; j < m + 3; j++) { AT.push([]); for (i = 0; i < A.length; i++) AT[j].push(A[i][j]); }
+      var rhs = t.members.map(function (mb) { return -mb.force * mb.len / EA; }).concat([0, 0, 0]);
+      var d = solve(AT, rhs) || [];
+      t.nodes.forEach(function (nd, k) { nd.dx = d[2 * k] || 0; nd.dy = d[2 * k + 1] || 0; });
+    } else t.nodes.forEach(function (nd) { nd.dx = 0; nd.dy = 0; });
+    // sức chịu tải: quét vị trí bất lợi nhất với tải 1 N
+    var worst = 0, worstX = L / 2;
+    for (var k = 0; k <= 40; k++) {
+      var xs = L * k / 40, y = solve(A, loadVector(t, xs, 1));
+      if (!y) continue;
+      t.members.forEach(function (mb, i) { var u = y[i] >= 0 ? y[i] / mb.capT : -y[i] / mb.capC; if (u > worst) { worst = u; worstX = xs; } });
+    }
+    t.capacityN = worst > 0 ? 1 / worst : Infinity; t.worstX = worstX;
+    return t;
+  }
+  return { build: build, analyze: analyze, EA: EA, T_CAP: T_CAP, capComp: capComp };
+})();
+if (typeof module !== 'undefined') module.exports = TrussCore;
+
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var cv = $('cv'), ctx = cv.getContext('2d'), sheet = $('sheet');
+  var S = { type: 'warren', L: 60, H: 12, n: 6, W: 10, kg: 2, x: 30, group: 'Nhóm 1 · Kỹ sư trẻ',
+    view: '2d', rotY: -0.55, rotX: 0.32, dim: true, diag: true, tri: true, node: true, force: false, val: false, def: false,
+    running: false, dir: 1, hover: -1, speed: 2, xMin: -20, xMax: 80, pulse: 0 };
+  var onBridge = function () { return S.x >= 0 && S.x <= S.L; };
+  var T = null, TF = null, C = {};
+  var NAMES = { warren: 'Warren', pratt: 'Pratt', howe: 'Howe', parker: 'Vòm Parker' };
+  var DESC = { warren: 'Warren: tam giác cân xen kẽ, không có thanh đứng.', pratt: 'Pratt: thanh chéo dốc về giữa nhịp và chịu kéo.', howe: 'Howe: thanh chéo dốc ra mố cầu và chịu nén.', parker: 'Parker: biên trên cong như vòm, tiết kiệm vật liệu.' };
+  var MNAME = { top: 'Biên trên', bottom: 'Biên dưới', diagonal: 'Thanh giằng chéo', endpost: 'Thanh xiên đầu cầu', vertical: 'Thanh đứng' };
+
+  function tokens() {
+    var cs = getComputedStyle(document.documentElement), g = function (k) { return cs.getPropertyValue(k).trim(); };
+    ['--sheet','--grid-a','--grid-b','--ink','--muted','--line','--panel','--accent','--cyan','--amber','--tension','--compress','--zero','--ok','--warn','--bad'].forEach(function (k) { C[k.slice(2)] = g(k); });
+    C.dark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+      (!document.documentElement.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+  function alpha(hex, a) { var h = hex.replace('#', ''); if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+    var n = parseInt(h, 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; }
+  var fmt = function (v, d) { return (Math.round(v * Math.pow(10, d || 1)) / Math.pow(10, d || 1)).toFixed(d === undefined ? 1 : d); };
+  var showForce = function () { return S.force || S.running; };
+
+  function compute() {
+    var Pplane = onBridge() ? S.kg * 9.81 / 2 : 0;
+    T = TrussCore.analyze(S.type, S.L, S.H, S.n, Math.max(0, Math.min(S.L, S.x)), Pplane, true);
+    updateUI();
+  }
+
+  function paperLength() {
+    var one = T.members.reduce(function (s, m) { return s + m.len; }, 0);
+    return one * 2 + T.nodes.length * S.W;
+  }
+
+  function updateUI() {
+    var diag = T.members.filter(function (m) { return m.type === 'diagonal' || m.type === 'endpost'; });
+    var ang = Math.atan2(S.H, (S.type === 'warren' ? T.bay / 2 : T.bay)) * 180 / Math.PI;
+    $('kTri').textContent = T.triangles.length;
+    $('kMem').innerHTML = T.members.length + '<small> / ' + T.nodes.length + '</small>';
+    $('kLen').innerHTML = Math.round(paperLength()) + '<small> cm</small>';
+    $('kT').innerHTML = (S.kg ? fmt(T.maxT) : '0') + '<small> N</small>';
+    $('kC').innerHTML = (S.kg ? fmt(T.maxC) : '0') + '<small> N</small>';
+    var capKg = T.capacityN * 2 / 9.81;
+    $('kCap').innerHTML = fmt(capKg) + '<small> kg</small>';
+    var st = $('kStat'), u = T.maxU;
+    if (!S.kg || !onBridge()) { st.className = 'pill idle'; st.textContent = 'Chưa đặt tải'; }
+    else if (u < 0.6) { st.className = 'pill ok'; st.textContent = 'An toàn · dùng ' + Math.round(u * 100) + '%'; }
+    else if (u < 1) { st.className = 'pill warn'; st.textContent = 'Gần giới hạn · ' + Math.round(u * 100) + '%'; }
+    else { st.className = 'pill bad'; st.textContent = 'Gãy cầu · ' + Math.round(u * 100) + '%'; }
+    $('alert').hidden = !(S.kg && onBridge() && u >= 1);
+    $('rBay').textContent = fmt(T.bay) + ' cm';
+    $('rAng').textContent = Math.round(ang) + '°';
+    $('rRat').textContent = fmt(S.L / S.H);
+    $('rRA').textContent = fmt(T.R.Ay * 2) + ' N'; $('tdesc').textContent = DESC[S.type];
+    $('rRB').textContent = fmt(T.R.By * 2) + ' N';
+    $('rWorst').textContent = fmt(T.worstX) + ' cm';
+    $('oP2').textContent = fmt(S.kg * 9.81) + ' N';
+    $('legend').style.visibility = showForce() ? 'visible' : 'hidden';
+    void diag;
+  }
+
+  /* ---------- 2D ---------- */
+  function transform(w, h) {
+    var padX = Math.max(70, w * 0.09), top = 92, bottom = Math.max(150, h * 0.27);
+    var H0 = S.H * 1.2, s = Math.min((w - 2 * padX) / S.L, (h - top - bottom) / H0);
+    var ox = (w - S.L * s) / 2, oy = top + (h - top - bottom + H0 * s) / 2;
+    S.xMin = (40 - ox) / s; S.xMax = (w - 40 - ox) / s;
+    return { s: s, X: function (x) { return ox + x * s; }, Y: function (y) { return oy - y * s; }, ox: ox, oy: oy };
+  }
+  var defScale = function () {
+    if (!S.def || !S.kg) return 0;
+    var m = 0; T.nodes.forEach(function (n) { m = Math.max(m, Math.hypot(n.dx, n.dy)); });
+    return m ? S.H * 0.09 / m : 0;
+  };
+  function P(n, k) { return { x: TF.X(n.x + n.dx * k), y: TF.Y(n.y + n.dy * k) }; }
+
+  function grid(w, h) {
+    ctx.fillStyle = C.sheet; ctx.fillRect(0, 0, w, h);
+    for (var x = 0, i = 0; x < w; x += 20, i++) { ctx.strokeStyle = i % 5 ? C['grid-a'] : C['grid-b']; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x + .5, 0); ctx.lineTo(x + .5, h); ctx.stroke(); }
+    for (var y = 0, j = 0; y < h; y += 20, j++) { ctx.strokeStyle = j % 5 ? C['grid-a'] : C['grid-b']; ctx.beginPath(); ctx.moveTo(0, y + .5); ctx.lineTo(w, y + .5); ctx.stroke(); }
+  }
+
+  function ground(w) {
+    var y0 = TF.Y(0) + 30, xl = TF.X(0), xr = TF.X(S.L);
+    ctx.save();
+    // mặt nước
+    ctx.fillStyle = alpha(C.cyan, C.dark ? .12 : .1);
+    ctx.fillRect(xl + 18, y0 + 26, xr - xl - 36, 46);
+    ctx.strokeStyle = alpha(C.cyan, .5); ctx.lineWidth = 1.2;
+    for (var r = 0; r < 3; r++) { ctx.beginPath(); for (var x = xl + 22; x < xr - 22; x += 4) { var yy = y0 + 34 + r * 13 + Math.sin(x / 9 + r) * 2; x === xl + 22 ? ctx.moveTo(x, yy) : ctx.lineTo(x, yy); } ctx.stroke(); }
+    // hai bờ
+    [[0, xl + 26, -1], [xr - 26, w, 1]].forEach(function (b) {
+      ctx.beginPath();
+      if (b[2] < 0) { ctx.moveTo(b[0], y0); ctx.lineTo(xl + 26, y0); ctx.lineTo(xl - 4, y0 + 80); ctx.lineTo(0, y0 + 80); }
+      else { ctx.moveTo(xr - 26, y0); ctx.lineTo(w, y0); ctx.lineTo(w, y0 + 80); ctx.lineTo(xr + 4, y0 + 80); }
+      ctx.closePath(); ctx.fillStyle = alpha(C.muted, C.dark ? .16 : .12); ctx.fill();
+      ctx.save(); ctx.clip(); ctx.strokeStyle = alpha(C.muted, .35); ctx.lineWidth = 1;
+      for (var k = -100; k < w + 100; k += 9) { ctx.beginPath(); ctx.moveTo(k, y0); ctx.lineTo(k - 30, y0 + 80); ctx.stroke(); }
+      ctx.restore();
+      ctx.strokeStyle = C.muted; ctx.lineWidth = 1.5; ctx.beginPath();
+      if (b[2] < 0) { ctx.moveTo(0, y0); ctx.lineTo(xl + 26, y0); ctx.lineTo(xl - 4, y0 + 80); }
+      else { ctx.moveTo(w, y0); ctx.lineTo(xr - 26, y0); ctx.lineTo(xr + 4, y0 + 80); }
+      ctx.stroke();
+    });
+    // đường dẫn lên cầu + mố bê tông
+    var yr = TF.Y(0);
+    [[0, xl - 16], [xr + 16, w]].forEach(function (seg, i) {
+      ctx.fillStyle = alpha(C.muted, C.dark ? .35 : .28); ctx.fillRect(i ? seg[0] : seg[0], yr + 6, seg[1] - seg[0], y0 - yr - 6);
+      ctx.fillStyle = C.dark ? '#3a4656' : '#4a5566'; ctx.fillRect(seg[0], yr - 1, seg[1] - seg[0], 7);
+      ctx.strokeStyle = alpha('#ffd84d', .8); ctx.setLineDash([10, 8]); ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(seg[0], yr + 2.5); ctx.lineTo(seg[1], yr + 2.5); ctx.stroke(); ctx.setLineDash([]);
+    });
+    ctx.restore();
+  }
+
+  function supports() {
+    var y = TF.Y(0);
+    [[TF.X(0), false], [TF.X(S.L), true]].forEach(function (s) {
+      var x = s[0]; ctx.save(); ctx.fillStyle = C.panel; ctx.strokeStyle = C.ink; ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.moveTo(x, y + 5); ctx.lineTo(x - 13, y + (s[1] ? 21 : 30)); ctx.lineTo(x + 13, y + (s[1] ? 21 : 30)); ctx.closePath(); ctx.fill(); ctx.stroke();
+      if (s[1]) { [-7, 0, 7].forEach(function (d) { ctx.beginPath(); ctx.arc(x + d, y + 25.5, 3.6, 0, 7); ctx.fill(); ctx.stroke(); }); }
+      ctx.restore();
+    });
+  }
+
+  function triangles(k) {
+    if (!S.tri) return;
+    T.triangles.forEach(function (t, i) {
+      var a = P(T.nodes[t[0]], k), b = P(T.nodes[t[1]], k), c = P(T.nodes[t[2]], k);
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c.x, c.y); ctx.closePath();
+      ctx.fillStyle = alpha(i % 2 ? C.cyan : C.accent, C.dark ? .13 : .09); ctx.fill();
+      if (!S.val || !showForce()) {
+        ctx.fillStyle = alpha(C.cyan, .95); ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('Δ' + (i + 1), (a.x + b.x + c.x) / 3, (a.y + b.y + c.y) / 3);
+      }
+    });
+  }
+
+  function memberStyle(m, i) {
+    var col = C.ink, w = (m.type === 'top' || m.type === 'bottom') ? 5 : 3.4;
+    if (showForce() && S.kg) {
+      var f = m.force, tiny = Math.abs(f) < 0.05;
+      col = tiny ? C.zero : (f > 0 ? C.tension : C.compress);
+      w = tiny ? 2.6 : 2.8 + Math.min(1.2, m.util) * 5;
+    } else if (S.diag && (m.type === 'diagonal' || m.type === 'endpost')) { col = C.amber; w = 4; }
+    else if (m.type === 'vertical') { col = C.muted; w = 3; }
+    if (i === S.hover) { col = C.accent; w += 3; }
+    return { col: col, w: w };
+  }
+
+  function members(k) {
+    T.members.forEach(function (m, i) {
+      var a = P(T.nodes[m.u], k), b = P(T.nodes[m.v], k), st = memberStyle(m, i);
+      ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = st.col; ctx.lineWidth = st.w;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      if (S.kg && m.util >= 1) { // thanh gãy: vạch đứt chéo
+        var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+        ctx.strokeStyle = C.bad; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.moveTo(mx - 7, my - 7); ctx.lineTo(mx + 7, my + 7); ctx.moveTo(mx + 7, my - 7); ctx.lineTo(mx - 7, my + 7); ctx.stroke();
+      }
+      ctx.restore();
+    });
+    if (S.val && showForce() && S.kg) {
+      ctx.save(); ctx.font = '600 10.5px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      T.members.forEach(function (m) {
+        var a = P(T.nodes[m.u], k), b = P(T.nodes[m.v], k), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+        var tx = fmt(Math.abs(m.force)), wpx = ctx.measureText(tx).width + 8;
+        if (m.type === 'top') my -= 11; if (m.type === 'bottom') my += 11;
+        ctx.fillStyle = alpha(C.sheet, .92); ctx.fillRect(mx - wpx / 2, my - 8, wpx, 16);
+        ctx.fillStyle = Math.abs(m.force) < .05 ? C.zero : (m.force > 0 ? C.tension : C.compress); ctx.fillText(tx, mx, my);
+      });
+      ctx.restore();
+    }
+    if (S.diag && !showForce()) {
+      var d = T.members.filter(function (m) { return m.type === 'diagonal' || m.type === 'endpost'; })[0];
+      if (d) { var a = P(T.nodes[d.u], k), b = P(T.nodes[d.v], k);
+        ctx.save(); ctx.font = '600 11.5px "Be Vietnam Pro", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        var lx = (a.x + b.x) / 2 + 12, ly = (a.y + b.y) / 2 - 18, tw = ctx.measureText('← thanh giằng chéo').width;
+        ctx.fillStyle = alpha(C.sheet, .9); ctx.fillRect(lx - 4, ly - 9, tw + 8, 18);
+        ctx.fillStyle = C.amber; ctx.fillText('← thanh giằng chéo', lx, ly); ctx.restore(); }
+    }
+  }
+
+  function nodes(k) {
+    T.nodes.forEach(function (n) {
+      var p = P(n, k); ctx.save();
+      ctx.beginPath(); ctx.arc(p.x, p.y, 4.6, 0, 7); ctx.fillStyle = C.sheet; ctx.fill(); ctx.lineWidth = 2.2; ctx.strokeStyle = C.ink; ctx.stroke();
+      if (S.node) { ctx.fillStyle = C.muted; ctx.font = '600 10px "IBM Plex Mono", monospace'; ctx.textAlign = 'center';
+        var end = n.label === 'A0' ? -1 : (n.label === 'A' + S.n ? 1 : 0);
+        if (end) { ctx.textAlign = end < 0 ? 'right' : 'left'; ctx.fillText(n.label, p.x + end * 10, p.y - 8); }
+        else ctx.fillText(n.label, p.x, p.y + (n.chord === 'top' ? -11 : 17)); }
+      ctx.restore();
+    });
+  }
+
+  function arrow(x1, y1, x2, y2, col, w) {
+    var a = Math.atan2(y2 - y1, x2 - x1), L = 9;
+    ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = w || 1.4;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2 - Math.cos(a) * L * .6, y2 - Math.sin(a) * L * .6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - L * Math.cos(a - .38), y2 - L * Math.sin(a - .38)); ctx.lineTo(x2 - L * Math.cos(a + .38), y2 - L * Math.sin(a + .38)); ctx.closePath(); ctx.fill();
+  }
+
+  function dims() {
+    if (!S.dim) return;
+    var xl = TF.X(0), xr = TF.X(S.L), yb = TF.Y(0), yt = TF.Y(S.H);
+    ctx.save(); ctx.strokeStyle = C.ok; ctx.fillStyle = C.ok; ctx.lineWidth = 1;
+    var yd = yt - 34; ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(xl, yb - 8); ctx.lineTo(xl, yd - 6); ctx.moveTo(xr, yb - 8); ctx.lineTo(xr, yd - 6); ctx.stroke(); ctx.setLineDash([]);
+    arrow((xl + xr) / 2, yd, xl, yd, C.ok); arrow((xl + xr) / 2, yd, xr, yd, C.ok);
+    var lab = 'L = ' + S.L + ' cm  (' + S.n + ' × ' + fmt(T.bay) + ' cm)';
+    ctx.font = '600 12px "IBM Plex Mono", monospace'; var tw = ctx.measureText(lab).width;
+    ctx.fillStyle = C.sheet; ctx.fillRect((xl + xr) / 2 - tw / 2 - 6, yd - 9, tw + 12, 18);
+    ctx.fillStyle = C.ok; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(lab, (xl + xr) / 2, yd);
+    var xd = xl - 40; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(xl - 6, yb); ctx.lineTo(xd - 6, yb);
+    var topX = S.type === 'warren' ? TF.X(T.bay / 2) : TF.X(T.bay); ctx.moveTo(topX - 6, yt); ctx.lineTo(xd - 6, yt); ctx.stroke(); ctx.setLineDash([]);
+    arrow(xd, (yb + yt) / 2, xd, yt, C.ok); arrow(xd, (yb + yt) / 2, xd, yb, C.ok);
+    ctx.save(); ctx.translate(xd - 12, (yb + yt) / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.fillText('H = ' + S.H + ' cm', 0, 0); ctx.restore();
+    ctx.restore();
+  }
+
+  function load(k) {
+    if (!S.kg) return;
+    var dy = 0;
+    if (onBridge()) { var s = S.x / T.bay, i = Math.min(S.n - 1, Math.floor(s)), r = s - i;
+      var a = T.nodes[i], b = T.nodes[i + 1]; dy = (a.dy * (1 - r) + b.dy * r) * k; }
+    var px = TF.X(S.x), py = TF.Y(dy) - (onBridge() ? 0 : 1);
+    ctx.save();
+    var tk = Math.max(0.75, Math.min(1.25, TF.s * T.bay / 70));
+    drawTruck(px, py, tk);
+    if (!onBridge()) { ctx.restore(); return; }
+    ctx.fillStyle = C.compress; ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    var ly = py - 68 * tk - 22;
+    ctx.fillText('P = ' + fmt(S.kg * 9.81) + ' N', px, ly);
+    arrow(px, ly + 8, px, py - 64 * tk, C.compress, 2);
+    // phản lực
+    var y0 = TF.Y(0) + 34;
+    [[TF.X(0), T.R.Ay * 2, 'R_A'], [TF.X(S.L), T.R.By * 2, 'R_B']].forEach(function (q) {
+      var len = 16 + 46 * q[1] / (S.kg * 9.81);
+      arrow(q[0], y0 + len, q[0], y0, C.ok, S.running ? 3.4 : 2.2);
+      ctx.fillStyle = C.ok; ctx.textAlign = q[2] === 'R_A' ? 'right' : 'left';
+      ctx.fillText((q[2] === 'R_A' ? 'Rᴀ = ' : 'Rʙ = ') + fmt(q[1]) + ' N', q[0] + (q[2] === 'R_A' ? -8 : 8), y0 + len - 4);
+    });
+    ctx.restore();
+  }
+
+
+  /* Xe tải: gốc tại (px, py) = điểm giữa trên mặt cầu, hướng sang phải */
+  function drawTruck(px, py, k) {
+    var dirR = S.dir >= 0;
+    ctx.save(); ctx.translate(px, py); ctx.scale(dirR ? k : -k, k);
+    function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+    // bóng đổ
+    ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(0, -1, 50, 3.2, 0, 0, 7); ctx.fill();
+    // khung gầm
+    ctx.fillStyle = '#2b3645'; rr(-48, -19, 98, 7, 2); ctx.fill();
+    // thùng hàng
+    var g = ctx.createLinearGradient(0, -62, 0, -19); g.addColorStop(0, '#f6b84a'); g.addColorStop(1, '#d9861c');
+    ctx.fillStyle = g; rr(-50, -62, 62, 44, 3); ctx.fill();
+    ctx.strokeStyle = '#9c5d0c'; ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.strokeStyle = 'rgba(120,64,6,.45)'; ctx.lineWidth = 1;
+    for (var x = -40; x <= 2; x += 10.5) { ctx.beginPath(); ctx.moveTo(x, -58); ctx.lineTo(x, -22); ctx.stroke(); }
+    ctx.fillStyle = '#9c5d0c'; ctx.fillRect(-50, -62, 62, 4);
+    // nhãn khối lượng
+    ctx.fillStyle = 'rgba(255,255,255,.92)'; rr(-42, -49, 46, 17, 3); ctx.fill();
+    ctx.save(); if (!dirR) { ctx.scale(-1, 1); }
+    ctx.fillStyle = '#7a4505'; ctx.font = '700 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(fmt(S.kg) + ' kg', dirR ? -19 : 19, -40.5); ctx.restore();
+    // cabin
+    var gc = ctx.createLinearGradient(0, -54, 0, -19); gc.addColorStop(0, '#3b8bff'); gc.addColorStop(1, '#1554c0');
+    ctx.fillStyle = gc; ctx.beginPath();
+    ctx.moveTo(14, -19); ctx.lineTo(14, -54); ctx.lineTo(34, -54); ctx.quadraticCurveTo(40, -54, 43, -48);
+    ctx.lineTo(49, -35); ctx.lineTo(50, -24); ctx.quadraticCurveTo(50, -19, 46, -19); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#0e3d8f'; ctx.lineWidth = 1.2; ctx.stroke();
+    // kính
+    var gw = ctx.createLinearGradient(20, -50, 44, -36); gw.addColorStop(0, '#e6f6ff'); gw.addColorStop(1, '#8fcbe8');
+    ctx.fillStyle = gw; ctx.beginPath(); ctx.moveTo(19, -36); ctx.lineTo(19, -50); ctx.lineTo(33, -50); ctx.quadraticCurveTo(37, -50, 39, -46); ctx.lineTo(44, -36); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.moveTo(24, -48); ctx.lineTo(29, -39); ctx.stroke();
+    // cửa + tay nắm
+    ctx.strokeStyle = 'rgba(8,40,100,.55)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(17, -21); ctx.lineTo(17, -52); ctx.moveTo(36, -21); ctx.lineTo(36, -34); ctx.stroke();
+    ctx.fillStyle = '#dbe6f3'; rr(21, -31, 6, 2.2, 1); ctx.fill();
+    // gương
+    ctx.fillStyle = '#1b2430'; rr(40, -47, 3, 7, 1); ctx.fill();
+    // đèn pha + đèn hậu
+    ctx.fillStyle = '#ffe27a'; rr(46, -30, 4, 5, 1.5); ctx.fill();
+    ctx.fillStyle = 'rgba(255,226,122,.35)'; ctx.beginPath(); ctx.moveTo(50, -29); ctx.lineTo(64, -33); ctx.lineTo(64, -21); ctx.lineTo(50, -26); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#e5484d'; rr(-52, -30, 3, 6, 1); ctx.fill();
+    // cản trước
+    ctx.fillStyle = '#7b8794'; rr(44, -22, 8, 5, 1.5); ctx.fill();
+    // ống xả
+    ctx.fillStyle = '#5b6573'; rr(10, -66, 3, 14, 1); ctx.fill();
+    // bánh xe
+    [-36, -21, 34].forEach(function (wx) {
+      ctx.fillStyle = '#141b24'; ctx.beginPath(); ctx.arc(wx, -9, 9, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#3a4656'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(wx, -9, 7, 0, 7); ctx.stroke();
+      ctx.fillStyle = '#c9d3df'; ctx.beginPath(); ctx.arc(wx, -9, 4.2, 0, 7); ctx.fill();
+      ctx.fillStyle = '#6b7684'; for (var b = 0; b < 5; b++) { var an = b * 1.2566 + S.x * 0.35; ctx.beginPath(); ctx.arc(wx + Math.cos(an) * 2.6, -9 + Math.sin(an) * 2.6, .8, 0, 7); ctx.fill(); }
+    });
+    // chắn bùn
+    ctx.strokeStyle = '#1b2430'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(34, -9, 11.5, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+    ctx.restore();
+  }
+
+  function fitText(txt, maxW, font) { ctx.font = font; if (ctx.measureText(txt).width <= maxW) return txt;
+    while (txt.length > 2 && ctx.measureText(txt + '…').width > maxW) txt = txt.slice(0, -1); return txt + '…'; }
+  function fitFont(txt, maxW, weight, size, fam) { var sz = size; ctx.font = weight + ' ' + sz + 'px ' + fam;
+    while (sz > 9 && ctx.measureText(txt).width > maxW) { sz -= .5; ctx.font = weight + ' ' + sz + 'px ' + fam; } return sz; }
+  function titleBlock(w, h) {
+    if (w < 600) return;
+    var bw = Math.min(360, w * 0.36), bh = 70, x = w - bw - 14, y = 14, split = bw * 0.56, pad = 10;
+    ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = alpha(C.sheet, .96); ctx.fillRect(x, y, bw, bh);
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 1.4; ctx.strokeRect(x + .5, y + .5, bw, bh);
+    ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(x, y + 30); ctx.lineTo(x + bw, y + 30); ctx.moveTo(x + split, y + 30); ctx.lineTo(x + split, y + bh); ctx.stroke();
+    var title = 'CẦU GIÀN ' + NAMES[S.type].toUpperCase(), scale = 'TỈ LỆ: VỪA KHỔ';
+    ctx.font = '500 9.5px "IBM Plex Mono", monospace'; var sw = ctx.measureText(scale).width;
+    var showScale = bw - 2 * pad - sw - 12 > 120;
+    var tMax = bw - 2 * pad - (showScale ? sw + 12 : 0);
+    var tsz = fitFont(title, tMax, '800', 13.5, 'Archivo, sans-serif');
+    ctx.fillStyle = C.ink; ctx.fillText(title, x + pad, y + 16);
+    if (showScale) { ctx.font = '500 9.5px "IBM Plex Mono", monospace'; ctx.fillStyle = C.muted; ctx.textAlign = 'right'; ctx.fillText(scale, x + bw - pad, y + 16); ctx.textAlign = 'left'; }
+    var colW = split - 2 * pad, mono = '"IBM Plex Mono", monospace';
+    var l1 = 'L ' + S.L + ' · H ' + S.H + ' · W ' + S.W + ' cm', l2 = T.triangles.length + ' tam giác · ' + T.members.length + ' thanh';
+    var msz = Math.min(fitFont(l1, colW, '500', 10.5, mono), fitFont(l2, colW, '500', 10.5, mono));
+    ctx.font = '500 ' + msz + 'px ' + mono; ctx.fillStyle = C.muted; ctx.fillText(l1, x + pad, y + 43); ctx.fillText(l2, x + pad, y + 59);
+    var cw = bw - split - 2 * pad;
+    ctx.fillStyle = C.ink; ctx.font = '600 11px "Be Vietnam Pro", sans-serif'; ctx.fillText('Thiết kế:', x + split + pad, y + 43);
+    ctx.fillStyle = C.accent; ctx.fillText(fitText((S.group || '').trim() || '—', cw, '600 11px "Be Vietnam Pro", sans-serif'), x + split + pad, y + 59);
+    ctx.restore();
+  }
+
+  function callout(k) {
+    if (!showForce() || !S.kg || !onBridge()) return;
+    var best = -1, bu = 0; T.members.forEach(function (m, i) { if (m.util > bu) { bu = m.util; best = i; } });
+    if (best < 0) return;
+    var m = T.members[best], a = P(T.nodes[m.u], k), b = P(T.nodes[m.v], k), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    var col = m.force >= 0 ? C.tension : C.compress, ph = (Math.sin(S.pulse) + 1) / 2;
+    ctx.save(); ctx.strokeStyle = alpha(col, .35 + .4 * ph); ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(mx, my, 14 + 6 * ph, 0, 7); ctx.stroke();
+    ctx.strokeStyle = alpha(col, .18); ctx.lineWidth = 14 + 8 * ph; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.restore();
+  }
+  function hud(w, h) {
+    if (!(S.running || showForce()) || !S.kg || w < 600) return;
+    var x = 12, y = 58, bw = 236, rows = [
+      ['Trọng lượng xe P', onBridge() ? S.kg * 9.81 : 0, C.compress],
+      ['Gối trái Rᴀ', T.R.Ay * 2, C.ok], ['Gối phải Rʙ', T.R.By * 2, C.ok],
+      ['Kéo lớn nhất', T.maxT, C.tension], ['Nén lớn nhất', T.maxC, C.compress]];
+    var maxV = Math.max(1, S.kg * 9.81), bh = 26 + rows.length * 22 + 22;
+    ctx.save(); ctx.fillStyle = alpha(C.panel, .94); ctx.strokeStyle = C.line; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(x, y, bw, bh, 10); ctx.fill(); ctx.stroke();
+    ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillStyle = C.ink; ctx.font = '700 11px Archivo, sans-serif';
+    ctx.fillText('LỰC TÁC ĐỘNG (N)', x + 12, y + 15);
+    rows.forEach(function (r, i) {
+      var yy = y + 34 + i * 22, v = Math.max(0, r[1]);
+      ctx.fillStyle = C.muted; ctx.font = '500 11px "Be Vietnam Pro", sans-serif'; ctx.fillText(r[0], x + 12, yy);
+      ctx.fillStyle = alpha(r[2], .15); ctx.fillRect(x + 104, yy - 5, 80, 10);
+      ctx.fillStyle = r[2]; ctx.fillRect(x + 104, yy - 5, 80 * Math.min(1, v / maxV), 10);
+      ctx.fillStyle = C.ink; ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'right'; ctx.fillText(fmt(v), x + bw - 10, yy); ctx.textAlign = 'left';
+    });
+    var u = onBridge() ? T.maxU : 0, yy = y + 34 + rows.length * 22;
+    ctx.fillStyle = u >= 1 ? C.bad : u > .6 ? C.warn : C.ok; ctx.font = '600 11px "Be Vietnam Pro", sans-serif';
+    ctx.fillText(onBridge() ? 'Thanh yếu nhất dùng ' + Math.round(u * 100) + '% sức chịu' : 'Xe chưa lên cầu', x + 12, yy);
+    ctx.restore();
+  }
+
+  function render2D(w, h) {
+    TF = transform(w, h); var k = defScale();
+    ground(w); supports(); triangles(k); members(k); nodes(k); dims(); callout(k); load(k); titleBlock(w, h); hud(w, h);
+  }
+
+  /* ---------- 3D ---------- */
+  function render3D(w, h) {
+    var L = S.L, H = S.H, W = S.W, k = defScale();
+    var sc = Math.min(w / (L * 1.45), h / ((H + W) * 2.4)), cx = w / 2, cy = h / 2 + H * sc * .15;
+    var cY = Math.cos(S.rotY), sY = Math.sin(S.rotY), cX = Math.cos(S.rotX), sX = Math.sin(S.rotX);
+    function pr(x, y, z) { x -= L / 2; y -= H / 2; z -= W / 2;
+      var x1 = x * cY - z * sY, z1 = x * sY + z * cY, y2 = y * cX - z1 * sX, z2 = y * sX + z1 * cX, d = 1 / (1 + z2 / (L * 2.4));
+      return { x: cx + x1 * sc * d, y: cy - y2 * sc * d, z: z2 }; }
+    var segs = [], polys = [];
+    // mặt cầu
+    var bn = T.nodes.filter(function (n) { return n.chord === 'bottom'; });
+    for (var i = 0; i < bn.length - 1; i++) {
+      var a = bn[i], b = bn[i + 1];
+      polys.push({ pts: [pr(a.x + a.dx * k, a.dy * k, 0), pr(b.x + b.dx * k, b.dy * k, 0), pr(b.x + b.dx * k, b.dy * k, W), pr(a.x + a.dx * k, a.dy * k, W)], fill: alpha(C.cyan, .16) });
+    }
+    [0, L].forEach(function (x) { polys.push({ pts: [pr(x, -0.3, -2), pr(x, -0.3, W + 2), pr(x, -6, W + 2), pr(x, -6, -2)], fill: alpha(C.muted, .3) }); });
+    polys.forEach(function (p) { p.z = p.pts.reduce(function (s, q) { return s + q.z; }, 0) / p.pts.length; });
+    [0, W].forEach(function (z) {
+      T.members.forEach(function (m, i) {
+        var u = T.nodes[m.u], v = T.nodes[m.v], st = memberStyle(m, -9);
+        var p1 = pr(u.x + u.dx * k, u.y + u.dy * k, z), p2 = pr(v.x + v.dx * k, v.y + v.dy * k, z);
+        segs.push({ a: p1, b: p2, z: (p1.z + p2.z) / 2, col: st.col, w: st.w * .8 });
+      });
+    });
+    T.nodes.forEach(function (n) {
+      var p1 = pr(n.x + n.dx * k, n.y + n.dy * k, 0), p2 = pr(n.x + n.dx * k, n.y + n.dy * k, W);
+      segs.push({ a: p1, b: p2, z: (p1.z + p2.z) / 2, col: C.muted, w: 2 });
+    });
+    var all = polys.map(function (p) { return { poly: p, z: p.z + 1e3 * 0 }; }).concat(segs.map(function (s) { return { seg: s, z: s.z }; }));
+    all.sort(function (a, b) { return b.z - a.z; });
+    all.forEach(function (o) {
+      if (o.poly) { ctx.beginPath(); o.poly.pts.forEach(function (q, j) { j ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y); }); ctx.closePath(); ctx.fillStyle = o.poly.fill; ctx.fill(); ctx.strokeStyle = alpha(C.muted, .5); ctx.lineWidth = 1; ctx.stroke(); }
+      else { var s = o.seg; ctx.lineCap = 'round'; ctx.strokeStyle = s.col; ctx.lineWidth = s.w; ctx.beginPath(); ctx.moveTo(s.a.x, s.a.y); ctx.lineTo(s.b.x, s.b.y); ctx.stroke(); }
+    });
+    if (S.kg) {
+      var cx0 = S.x, hw = Math.min(W / 2 - 0.5, 3.2), len = Math.min(L * 0.18, 9), hb = Math.min(H * 0.32, 4);
+      function box(x0, x1, y0, y1, z0, z1, col) {
+        var f = [[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],[[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]],
+                 [[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],[[x1,y0,z0],[x1,y0,z1],[x1,y1,z1],[x1,y1,z0]],[[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]]];
+        return f.map(function (q, i) { var pts = q.map(function (v) { return pr(v[0], v[1], v[2]); });
+          return { pts: pts, z: pts.reduce(function (s, p) { return s + p.z; }, 0) / 4, col: col, shade: [1, .78, 1.12, .9, .9][i] }; });
+      }
+      var zc = W / 2, faces = box(cx0 - len / 2, cx0 + len * 0.18, 0.9, 0.9 + hb, zc - hw, zc + hw, [232, 154, 44])
+        .concat(box(cx0 + len * 0.2, cx0 + len / 2, 0.9, 0.9 + hb * 0.78, zc - hw, zc + hw, [31, 111, 235]));
+      faces.sort(function (a, b) { return b.z - a.z; });
+      faces.forEach(function (f) { ctx.beginPath(); f.pts.forEach(function (q, j) { j ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y); }); ctx.closePath();
+        ctx.fillStyle = 'rgb(' + f.col.map(function (c) { return Math.min(255, Math.round(c * f.shade)); }).join(',') + ')'; ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1; ctx.stroke(); });
+      [[-0.32, zc - hw], [-0.32, zc + hw], [0.36, zc - hw], [0.36, zc + hw]].forEach(function (wv) {
+        var c = pr(cx0 + wv[0] * len, 0.6, wv[1]); ctx.fillStyle = '#141b24'; ctx.beginPath(); ctx.arc(c.x, c.y, Math.max(3, sc * 0.6), 0, 7); ctx.fill();
+        ctx.fillStyle = '#c9d3df'; ctx.beginPath(); ctx.arc(c.x, c.y, Math.max(1.3, sc * 0.25), 0, 7); ctx.fill(); });
+      var tag = pr(cx0, 1.6 + hb, zc);
+      ctx.fillStyle = C.compress; ctx.font = '700 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.fillText(fmt(S.kg) + ' kg · ' + fmt(S.kg * 9.81) + ' N', tag.x, tag.y - 10);
+    }
+    titleBlock(w, h);
+  }
+
+  function render() {
+    tokens();
+    var dpr = window.devicePixelRatio || 1, r = sheet.getBoundingClientRect(), w = r.width, h = r.height;
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    grid(w, h);
+    S.view === '3d' ? render3D(w, h) : render2D(w, h);
+  }
+  var queued = false; function draw() { if (!queued) { queued = true; requestAnimationFrame(function () { queued = false; render(); }); } }
+  function refresh() { compute(); draw(); }
+
+  /* ---------- tương tác ---------- */
+  function hit(mx, my) {
+    var best = -1, bd = 10, k = defScale();
+    T.members.forEach(function (m, i) {
+      var a = P(T.nodes[m.u], k), b = P(T.nodes[m.v], k), dx = b.x - a.x, dy = b.y - a.y, l2 = dx * dx + dy * dy;
+      var t = Math.max(0, Math.min(1, ((mx - a.x) * dx + (my - a.y) * dy) / l2)), d = Math.hypot(mx - a.x - t * dx, my - a.y - t * dy);
+      if (d < bd) { bd = d; best = i; }
+    });
+    return best;
+  }
+  function tip(mx, my) {
+    var el = $('tip'); if (S.view !== '2d' || !TF) { el.hidden = true; return; }
+    var i = hit(mx, my); if (i !== S.hover) { S.hover = i; draw(); }
+    if (i < 0) { el.hidden = true; return; }
+    var m = T.members[i], a = T.nodes[m.u], b = T.nodes[m.v];
+    var ang = Math.abs(Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI); if (ang > 90) ang = 180 - ang;
+    var f = m.force, kind = !S.kg ? '<span style="color:var(--muted)">chưa có tải</span>' : Math.abs(f) < .05 ? '<span style="color:var(--zero)">≈ 0 N</span>' :
+      '<span style="color:' + (f > 0 ? 'var(--tension)">kéo ' : 'var(--compress)">nén ') + fmt(Math.abs(f)) + ' N</span>';
+    el.innerHTML = '<b>' + MNAME[m.type] + ' ' + a.label + '–' + b.label + '</b>' +
+      '<div class="r"><span>Chiều dài cắt</span><span>' + fmt(m.len) + ' cm</span></div>' +
+      '<div class="r"><span>Góc nghiêng</span><span>' + Math.round(ang) + '°</span></div>' +
+      '<div class="r"><span>Lực (1 mặt giàn)</span>' + kind + '</div>' +
+      '<div class="r"><span>Giới hạn ' + (f >= 0 ? 'kéo' : 'nén') + '</span><span>' + fmt(f >= 0 ? m.capT : m.capC) + ' N</span></div>' +
+      '<div class="r"><span>Mức sử dụng</span><span style="color:' + (m.util >= 1 ? 'var(--bad)' : m.util > .6 ? 'var(--warn)' : 'var(--ok)') + '">' + Math.round(m.util * 100) + '%</span></div>';
+    var r = sheet.getBoundingClientRect();
+    el.style.left = Math.min(r.width - 220, mx + 16) + 'px'; el.style.top = Math.max(8, Math.min(r.height - 150, my - 20)) + 'px'; el.hidden = false;
+  }
+  function setX(clientX) {
+    var r = sheet.getBoundingClientRect(); if (!TF) return;
+    S.x = Math.max(0, Math.min(S.L, Math.round(((clientX - r.left - TF.ox) / TF.s) * 2) / 2));
+    $('iX').value = S.x; $('oX').textContent = fmt(S.x) + ' cm'; refresh();
+  }
+  var drag = null;
+  cv.addEventListener('pointerdown', function (e) {
+    if (S.running && S.view === '2d') return;
+    cv.setPointerCapture(e.pointerId); drag = { x: e.clientX, y: e.clientY };
+    if (S.view === '2d') { var r = sheet.getBoundingClientRect(), my = e.clientY - r.top; if (TF && my > TF.Y(S.H) - 80 && my < TF.Y(0) + 30) setX(e.clientX); else drag = null; }
+  });
+  cv.addEventListener('pointermove', function (e) {
+    var r = sheet.getBoundingClientRect();
+    if (drag) {
+      if (S.view === '3d') { S.rotY += (e.clientX - drag.x) * .01; S.rotX = Math.max(-.4, Math.min(1.2, S.rotX + (e.clientY - drag.y) * .01)); drag = { x: e.clientX, y: e.clientY }; draw(); }
+      else setX(e.clientX);
+    } else if (e.pointerType === 'mouse') tip(e.clientX - r.left, e.clientY - r.top);
+  });
+  cv.addEventListener('pointerup', function () { drag = null; });
+  cv.addEventListener('pointerleave', function () { S.hover = -1; $('tip').hidden = true; draw(); });
+
+  function bindRange(id, out, key, f) {
+    $(id).addEventListener('input', function (e) { S[key] = parseFloat(e.target.value); $(out).textContent = f(S[key]); if (key === 'L') syncX(); refresh(); });
+  }
+  function syncX() { var ix = $('iX'); ix.max = S.L; if (S.x > S.L) S.x = S.L; ix.value = S.x; $('oX').textContent = fmt(S.x) + ' cm'; }
+  bindRange('iL', 'oL', 'L', function (v) { return v + ' cm'; });
+  bindRange('iH', 'oH', 'H', function (v) { return v + ' cm'; });
+  bindRange('iN', 'oN', 'n', function (v) { return v + ' khoang'; });
+  bindRange('iW', 'oW', 'W', function (v) { return v + ' cm'; });
+  bindRange('iP', 'oP', 'kg', function (v) { return fmt(v) + ' kg'; });
+  bindRange('iX', 'oX', 'x', function (v) { return fmt(v) + ' cm'; });
+  $('iG').addEventListener('input', function (e) { S.group = e.target.value; draw(); });
+  [['cDim', 'dim'], ['cDiag', 'diag'], ['cTri', 'tri'], ['cNode', 'node'], ['cForce', 'force'], ['cVal', 'val'], ['cDef', 'def']].forEach(function (p) {
+    $(p[0]).addEventListener('change', function (e) {
+      S[p[1]] = e.target.checked;
+      if (p[1] === 'val' && S.val && !S.force) { S.force = true; $('cForce').checked = true; }
+      if (S.force && !S.kg) { S.kg = 2; $('iP').value = 2; $('oP').textContent = '2.0 kg'; }
+      refresh();
+    });
+  });
+  document.querySelectorAll('.type').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.type = b.dataset.t; document.querySelectorAll('.type').forEach(function (x) { x.setAttribute('aria-pressed', x === b); }); refresh();
+    });
+  });
+  function setView(v) {
+    S.view = v; $('v2d').setAttribute('aria-pressed', v === '2d'); $('v3d').setAttribute('aria-pressed', v === '3d');
+    $('hint').textContent = v === '2d' ? 'Kéo trên mặt cầu để dời vật nặng · rê chuột vào thanh để xem số liệu' : 'Kéo để xoay mô hình 3D';
+    cv.style.cursor = v === '3d' ? 'grab' : 'crosshair'; $('tip').hidden = true; draw();
+  }
+  $('v2d').addEventListener('click', function () { setView('2d'); });
+  $('v3d').addEventListener('click', function () { setView('3d'); });
+
+  var raf = 0, last = 0, SPEED = { 1: 7000, 2: 4600, 3: 2800 };
+  function tick(t) {
+    if (!S.running) return;
+    var dt = last ? Math.min(50, t - last) : 16; last = t;
+    S.pulse += dt / 160;
+    S.x += S.dir * S.L * dt / SPEED[S.speed];
+    if (S.x >= S.xMax) { S.x = S.xMax; S.dir = -1; } if (S.x <= S.xMin) { S.x = S.xMin; S.dir = 1; }
+    if (onBridge()) { $('iX').value = S.x; $('oX').textContent = fmt(S.x) + ' cm'; }
+    compute(); render(); raf = requestAnimationFrame(tick);
+  }
+  function setScene(on) {
+    if (on === S.running) return;
+    S.running = on;
+    [['btnRun', 'runIco', 'runLbl', 'Hoạt cảnh xe chạy'], ['btnScene', 'scIco', 'scLbl', 'Hoạt cảnh xe chạy qua cầu']].forEach(function (b) {
+      $(b[0]).classList.toggle('on', on); $(b[1]).textContent = on ? '■' : '▶'; $(b[2]).textContent = on ? 'Dừng hoạt cảnh' : b[3]; });
+    if (on) {
+      if (!S.kg) { S.kg = 2; $('iP').value = 2; $('oP').textContent = '2.0 kg'; }
+      S.val = true; $('cVal').checked = true; S.dir = 1; S.x = S.xMin; last = 0; setView('2d'); raf = requestAnimationFrame(tick);
+    } else { cancelAnimationFrame(raf); S.x = Math.max(0, Math.min(S.L, S.x)); $('iX').value = S.x; $('oX').textContent = fmt(S.x) + ' cm'; refresh(); }
+  }
+  $('btnRun').addEventListener('click', function () { setScene(!S.running); });
+  $('btnScene').addEventListener('click', function () { setScene(!S.running); });
+  $('iSpd').addEventListener('input', function (e) { S.speed = +e.target.value; $('oSpd').textContent = ['', 'Chậm', 'Vừa', 'Nhanh'][S.speed]; });
+
+  /* ---------- thẻ bảng điều khiển ---------- */
+  ['tab1', 'tab2', 'tab3'].forEach(function (id, i) {
+    $(id).addEventListener('click', function () {
+      ['tab1', 'tab2', 'tab3'].forEach(function (t, j) { $(t).setAttribute('aria-selected', i === j); $('pan' + (j + 1)).hidden = i !== j; });
+    });
+  });
+
+  /* ---------- giới thiệu: giọng đọc tiếng Anh + phụ đề tiếng Việt ---------- */
+  var TOUR = [
+    { t: null, step: 'Mở đầu', en: 'A truss bridge is built from straight members joined into triangles. A triangle cannot change its shape, so the whole bridge stays rigid.',
+      vi: 'Cầu giàn được làm từ các thanh thẳng nối với nhau thành tam giác. Tam giác không thể đổi hình, nên cả cây cầu luôn cứng vững.' },
+    { t: 'warren', step: 'Giàn Warren', en: 'The Warren truss uses equal triangles that point up and down in turn. It has no vertical members, so it needs fewer parts.',
+      vi: 'Giàn Warren dùng các tam giác cân lần lượt chĩa lên và chĩa xuống. Giàn không có thanh đứng nên cần ít thanh hơn.' },
+    { t: 'pratt', step: 'Giàn Pratt', en: 'In the Pratt truss, the diagonals slope down toward the middle. Under a load they are pulled, so they work in tension, shown in blue.',
+      vi: 'Ở giàn Pratt, các thanh chéo dốc xuống về phía giữa cầu. Khi có tải, chúng bị kéo căng, tức là chịu kéo, hiện màu xanh.' },
+    { t: 'howe', step: 'Giàn Howe', en: 'The Howe truss is the mirror of the Pratt. Its diagonals slope toward the supports and are pushed, so they work in compression, shown in red.',
+      vi: 'Giàn Howe là hình đối xứng của giàn Pratt. Thanh chéo dốc về phía mố cầu và bị ép lại, tức là chịu nén, hiện màu đỏ.' },
+    { t: 'parker', step: 'Giàn vòm Parker', en: 'The Parker truss has a curved top chord, like an arch. It is tallest where the bending is greatest, so it saves material on long spans.',
+      vi: 'Giàn Parker có biên trên cong như vòm. Cầu cao nhất ở chỗ bị uốn nhiều nhất, nên tiết kiệm vật liệu khi nhịp dài.' },
+    { t: null, step: 'Thử ngay', en: 'Now press the play button to drive the truck across, and watch how the forces move through each member.',
+      vi: 'Bây giờ hãy bấm nút hoạt cảnh để cho xe chạy qua cầu, và quan sát lực truyền qua từng thanh.' }
+  ];
+  var tourOn = false, tourIdx = 0, tourTimer = 0, voice = null, saved = null;
+  function pickVoice() {
+    if (!('speechSynthesis' in window)) return null;
+    var vs = speechSynthesis.getVoices().filter(function (v) { return /^en(-|_)/i.test(v.lang); });
+    var pref = vs.filter(function (v) { return /en-US/i.test(v.lang) && /Google|Natural|Aria|Jenny|Samantha|Microsoft/i.test(v.name); });
+    return pref[0] || vs.filter(function (v) { return /en-US/i.test(v.lang); })[0] || vs[0] || null;
+  }
+  if ('speechSynthesis' in window) { voice = pickVoice(); speechSynthesis.onvoiceschanged = function () { voice = pickVoice(); }; }
+  function selectType(t) {
+    S.type = t; document.querySelectorAll('.type').forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.t === t); });
+  }
+  function showStep(i) {
+    var st = TOUR[i]; tourIdx = i;
+    $('subStep').textContent = st.step + ' · ' + (i + 1) + '/' + TOUR.length; $('subVi').textContent = st.vi; $('subEn').textContent = st.en;
+    if (st.t) { selectType(st.t); S.force = true; $('cForce').checked = true; S.x = S.L / 2; $('iX').value = S.x; $('oX').textContent = fmt(S.x) + ' cm'; if (!S.kg) { S.kg = 2; $('iP').value = 2; } }
+    refresh();
+    var next = function () { if (!tourOn) return; if (i + 1 < TOUR.length) tourTimer = setTimeout(function () { showStep(i + 1); }, 700); else tourTimer = setTimeout(stopTour, 2500); };
+    var spoken = false;
+    if ('speechSynthesis' in window) {
+      try {
+        speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(st.en); u.lang = 'en-US'; u.rate = 0.92; if (voice) u.voice = voice;
+        u.onend = function () { if (!spoken) { spoken = true; next(); } };
+        u.onerror = function () { if (!spoken) { spoken = true; next(); } };
+        speechSynthesis.speak(u);
+        tourTimer = setTimeout(function () { if (!spoken) { spoken = true; next(); } }, 4000 + st.en.length * 95);
+        return;
+      } catch (e) {}
+    }
+    tourTimer = setTimeout(next, Math.max(4500, st.vi.length * 75));
+  }
+  function startTour() {
+    setScene(false); tourOn = true; saved = { type: S.type, force: S.force, x: S.x };
+    $('btnTour').classList.add('on'); $('tourLbl').textContent = 'Dừng giới thiệu'; $('subs').hidden = false; setView('2d'); showStep(0);
+    if (!('speechSynthesis' in window)) toast('Trình duyệt không hỗ trợ giọng đọc, chỉ hiện phụ đề');
+  }
+  function stopTour() {
+    tourOn = false; clearTimeout(tourTimer); if ('speechSynthesis' in window) speechSynthesis.cancel();
+    $('btnTour').classList.remove('on'); $('tourLbl').textContent = 'Giới thiệu kiểu giàn'; $('subs').hidden = true;
+  }
+  $('btnTour').addEventListener('click', function () { tourOn ? stopTour() : startTour(); });
+  $('subStop').addEventListener('click', stopTour);
+
+  $('btnTheme').addEventListener('click', function () {
+    var cur = C.dark ? 'dark' : 'light', next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('bridge-theme', next); } catch (e) {}
+    draw();
+  });
+  try { var th = localStorage.getItem('bridge-theme'); if (th) document.documentElement.setAttribute('data-theme', th); } catch (e) {}
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+
+  function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.h); toast.h = setTimeout(function () { t.classList.remove('show'); }, 2600); }
+
+  $('btnPng').addEventListener('click', function () {
+    try {
+      var a = document.createElement('a');
+      a.download = 'ban-ve-cau-' + S.type + '-' + S.L + 'x' + S.H + 'cm.png'; a.href = cv.toDataURL('image/png');
+      document.body.appendChild(a); a.click(); a.remove(); toast('Đã xuất bản vẽ PNG');
+    } catch (e) { toast('Trình duyệt chặn tải xuống. Hãy chụp màn hình bản vẽ.'); }
+  });
+
+  var bomText = '';
+  function openBom() {
+    var g = {}, order = ['bottom', 'top', 'endpost', 'diagonal', 'vertical'];
+    T.members.forEach(function (m) { var key = m.type + '|' + fmt(m.len); if (!g[key]) g[key] = { type: m.type, len: +fmt(m.len), qty: 0 }; g[key].qty += 2; });
+    var rows = Object.keys(g).map(function (k) { return g[k]; }).sort(function (a, b) { return order.indexOf(a.type) - order.indexOf(b.type) || b.len - a.len; });
+    rows.push({ type: 'cross', len: S.W, qty: T.nodes.length });
+    var nPipe = rows.reduce(function (s, r) { return s + r.qty; }, 0), total = rows.reduce(function (s, r) { return s + r.qty * r.len; }, 0);
+    var a4 = Math.ceil(total / 26) + Math.ceil(S.L * S.W / 450);
+    var nm = function (t) { return t === 'cross' ? 'Thanh giằng ngang (nối 2 mặt)' : MNAME[t]; };
+    $('bomSub').textContent = 'Giàn ' + NAMES[S.type] + ' · ' + S.L + ' × ' + S.H + ' × ' + S.W + ' cm · ' + (S.group || '');
+    var h = '<div class="sum"><div><small>Tổng số ống</small><b>' + nPipe + '</b></div><div><small>Tổng chiều dài</small><b>' + Math.round(total) + ' cm</b></div><div><small>Giấy A4 cần</small><b>≈ ' + a4 + ' tờ</b></div></div>';
+    h += '<div class="tbl"><table><thead><tr><th>Bộ phận</th><th style="text-align:right">Dài cắt</th><th style="text-align:right">Số ống</th></tr></thead><tbody>';
+    var lines = ['BẢNG CẮT ỐNG GIẤY — ' + (S.group || ''), 'Giàn ' + NAMES[S.type] + ': dài ' + S.L + ' cm, cao ' + S.H + ' cm, rộng ' + S.W + ' cm', '----------------------------------------'];
+    rows.forEach(function (r) { h += '<tr><td>' + nm(r.type) + '</td><td class="n">' + r.len.toFixed(1) + ' cm</td><td class="n"><b>' + r.qty + '</b></td></tr>'; lines.push('- ' + nm(r.type) + ': ' + r.len.toFixed(1) + ' cm × ' + r.qty + ' ống'); });
+    h += '</tbody></table></div><div class="note"><b>Mẹo thi công:</b> cuộn giấy A4 thật chặt theo đường chéo quanh que xiên. Cắt dư mỗi đầu 1 cm, ép dẹt rồi dán keo nến tại các nút (A0, B1…). Thanh chịu nén nên cuộn hai lớp.</div>';
+    lines.push('----------------------------------------', 'Tổng: ' + nPipe + ' ống, ' + Math.round(total) + ' cm, khoảng ' + a4 + ' tờ A4');
+    bomText = lines.join('\n'); $('bomBody').innerHTML = h; $('bom').showModal();
+  }
+  $('btnBom').addEventListener('click', openBom);
+  $('bomX').addEventListener('click', function () { $('bom').close(); });
+  $('bomClose').addEventListener('click', function () { $('bom').close(); });
+  $('bomCopy').addEventListener('click', function () {
+    var ok = function () { toast('Đã sao chép bảng cắt'); };
+    if (navigator.clipboard) navigator.clipboard.writeText(bomText).then(ok, fallback); else fallback();
+    function fallback() { var ta = document.createElement('textarea'); ta.value = bomText; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); ok(); } catch (e) { toast('Hãy bôi đen và sao chép thủ công'); } ta.remove(); }
+  });
+
+  new ResizeObserver(draw).observe(sheet);
+  if (document.fonts) document.fonts.ready.then(draw);
+  refresh();
+})();
+</script>
+</body></html>
